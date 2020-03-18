@@ -30,7 +30,6 @@ services:
       - '8000:8000' # actually the web service
       - '8001:8001' # actually the homepage service
       - '8002:8002' # actually the article-page service
-      - '8888:8888' # actually the article-page service
       - '8889:8889' # actually the header service
       - '8890:8890' # actually the footer service
       - '8080:8080'
