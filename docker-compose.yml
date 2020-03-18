@@ -1,0 +1,103 @@
+version: '3.4'
+
+services:
+
+  article-store-db:
+    image: postgres:11.5-alpine
+    environment:
+      POSTGRES_DB: article-store
+      POSTGRES_USER: user
+
+  article-store-initdb:
+    image: liberoadmin/article-store:latest
+    command: >
+      /bin/sh -c '
+        while ! nc -z article-store-db 5432 ; do sleep 1 ; done
+        npm run initdb
+      '
+    environment:
+      DATABASE_HOST: article-store-db
+      DATABASE_NAME: article-store
+      DATABASE_USER: user
+
+  article-store:
+    image: liberoadmin/article-store:latest
+    environment:
+      DATABASE_HOST: article-store-db
+      DATABASE_NAME: article-store
+      DATABASE_USER: user
+    ports:
+      - '8000:8000' # actually the web service
+      - '8001:8001' # actually the homepage service
+      - '8002:8002' # actually the article-page service
+      - '8888:8888' # actually the article-page service
+      - '8889:8889' # actually the header service
+      - '8890:8890' # actually the footer service
+      - '8080:8080'
+
+  console:
+    image: tpluscode/hypermedia-app:version-0.12.2
+    environment:
+      API_ENTRYPOINTS: '{ "http://localhost:8080/": "Article Store" }'
+      BASE_URL: http://localhost:8080/
+    ports:
+      - '8081:8000'
+    healthcheck:
+      test: wget --quiet --tries=1 --spider http://localhost:8000/ || exit 1
+      interval: 5s
+      timeout: 1s
+
+  header:
+    build:
+      context: header/
+    environment:
+      NODE_PORT: '8889'
+    network_mode: service:article-store
+    volumes:
+      - ./header/src/:/app/src
+      - ./header/package.json:/app/package.json
+      - ./header/package-lock.json:/app/package-lock.json
+      - ./header/tsconfig.json:/app/tsconfig.json
+
+  footer:
+    build:
+      context: footer/
+    environment:
+      NODE_PORT: '8890'
+    network_mode: service:article-store
+    volumes:
+      - ./footer/src/:/app/src
+      - ./footer/package.json:/app/package.json
+      - ./footer/package-lock.json:/app/package-lock.json
+      - ./footer/tsconfig.json:/app/tsconfig.json
+
+  homepage:
+    build:
+      context: homepage/
+    environment:
+      NODE_PORT: '8001'
+    network_mode: service:article-store
+    volumes:
+      - ./homepage/src/:/app/src
+      - ./homepage/package.json:/app/package.json
+      - ./homepage/package-lock.json:/app/package-lock.json
+      - ./homepage/tsconfig.json:/app/tsconfig.json
+
+  article-page:
+    build:
+      context: article-page/
+    environment:
+      NODE_PORT: '8002'
+      PREFIX: /articles
+    network_mode: service:article-store
+    volumes:
+      - ./article-page/src/:/app/src
+      - ./article-page/package.json:/app/package.json
+      - ./article-page/package-lock.json:/app/package-lock.json
+      - ./article-page/tsconfig.json:/app/tsconfig.json
+
+  web:
+    image: nginx:1.17.9-alpine
+    network_mode: service:article-store
+    volumes:
+      - ./web/nginx.conf:/etc/nginx/nginx.conf:ro

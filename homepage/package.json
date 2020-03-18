@@ -1,0 +1,29 @@
+{
+  "private": true,
+  "dependencies": {
+    "@koa/router": "^8.0.8",
+    "@rdfjs/parser-jsonld": "^1.2.0",
+    "@tpluscode/rdf-ns-builders": "^0.1.0",
+    "@tpluscode/rdfine": "^0.3.5",
+    "alcaeus": "^1.0.0-alpha.9",
+    "btoa": "^1.2.1",
+    "cheerio": "^1.0.0-rc.3",
+    "koa": "^2.11.0",
+    "node-fetch": "^2.6.0",
+    "rdfa-streaming-parser": "^1.2.0"
+  },
+  "devDependencies": {
+    "@types/btoa": "^1.2.3",
+    "@types/cheerio": "^0.22.16",
+    "@types/koa": "^2.11.2",
+    "@types/koa__router": "^8.0.2",
+    "@types/node-fetch": "^2.5.5",
+    "@types/rdfjs__parser-jsonld": "^1.2.2",
+    "nodemon": "^2.0.2",
+    "ts-node": "^8.6.2",
+    "typescript": "^3.8.3"
+  },
+  "scripts": {
+    "start": "nodemon --exec 'node --require ts-node/register ./src/index.ts' --ext .js,.json,.ts"
+  }
+}
